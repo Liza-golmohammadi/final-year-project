@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkType - Parkinson's Disease Detection via Keystroke Dynamics</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4d2e;
+            --secondary: #4f772d;
+            --accent: #90be6d;
+            --highlight: #f9c74f;
+            --danger: #f94144;
+            --bg-dark: #0d1b0e;
+            --bg-light: #f8f9f5;
+            --text-dark: #1a1a1a;
+            --text-light: #f8f9f5;
+            --border: rgba(26, 77, 46, 0.2);
+            --shadow: rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e8f0e8 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(26, 77, 46, 0.03) 35px, rgba(26, 77, 46, 0.03) 70px);
+            pointer-events: none;
+            z-index: 0;
+            animation: patternShift 60s linear infinite;
+        }
+
+        @keyframes patternShift {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(70px) translateY(70px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--secondary);
+            font-weight: 300;
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .tagline {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Main grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleY(1);
+            transform-origin: top;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Instructions */
+        .instructions {
+            grid-column: 1 / -1;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .instructions li:last-child {
+            border-bottom: none;
+        }
+
+        .instructions li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Typing area */
+        #typing-area {
+            width: 100%;
+            min-height: 200px;
+            padding: 1.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.1rem;
+            border: 3px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-light);
+            transition: all 0.3s ease;
+            resize: vertical;
+            line-height: 1.8;
+        }
+
+        #typing-area:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(144, 190, 109, 0.1);
+        }
+
+        /* Sample text */
+        .sample-text {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(26, 77, 46, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: 'IBM Plex Mono', monospace;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow);
+            margin-right: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 77, 46, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(26, 77, 46, 0.05), rgba(79, 119, 45, 0.05));
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .stat:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+
+        .stat-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Results */
+        .results {
+            grid-column: 1 / -1;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prediction-box {
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 3px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .prediction-healthy {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-color: #28a745;
+        }
+
+        .prediction-risk {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-color: #ffc107;
+        }
+
+        .prediction-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .prediction-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 40px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            color: white;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+        }
+
+        /* Feature analysis */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .feature-item {
+            padding: 1rem;
+            background: rgba(26, 77, 46, 0.03);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+        }
+
+        .feature-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .feature-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .feature-normal {
+            color: #28a745;
+        }
+
+        .feature-warning {
+            color: #ffc107;
+        }
+
+        .feature-danger {
+            color: #dc3545;
+        }
+
+        /* Status indicator */
+        .status {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px var(--shadow);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            display: none;
+            animation: fadeInUp 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-recording {
+            background: var(--danger);
+        }
+
+        .status-ready {
+            background: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Chart styling */
+        canvas {
+            max-width: 100%;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NeuroType</h1>
+            <div class="subtitle">Parkinson's Disease Detection via Keystroke Dynamics</div>
+            <div class="tagline">Early Detection Through Digital Biomarkers</div>
+        </header>
+
+        <div class="grid">
+            <!-- Instructions -->
+            <div class="card instructions">
+                <div class="card-title">How It Works</div>
+                <ul>
+                    <li>This system analyzes subtle variations in your typing patterns to identify potential motor irregularities</li>
+                    <li>Type the provided text naturally - the system captures timing metrics like key press duration and intervals</li>
+                    <li>Machine learning algorithms analyze features associated with bradykinesia, tremor, and rigidity</li>
+                    <li>Results are for research demonstration only - not for medical diagnosis</li>
+                </ul>
+            </div>
+
+            <!-- Typing Test -->
+            <div class="card">
+                <div class="card-title">Typing Test</div>
+                <div class="sample-text">
+                    <strong>Type this passage:</strong><br><br>
+                    The quick brown fox jumps over the lazy dog. She sells seashells by the seashore. Peter Piper picked a peck of pickled peppers. How much wood would a woodchuck chuck if a woodchuck could chuck wood?
+                </div>
+                <textarea id="typing-area" placeholder="Start typing the passage above..."></textarea>
+                <button class="btn btn-primary" id="analyze-btn">Analyze Typing Pattern</button>
+                <button class="btn btn-secondary" id="reset-btn">Reset</button>
+            </div>
+
+            <!-- Live Statistics -->
+            <div class="card">
+                <div class="card-title">Live Statistics</div>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <span class="stat-value" id="keystroke-count">0</span>
+                        <span class="stat-label">Keystrokes</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="avg-hold-time">0</span>
+                        <span class="stat-label">Avg Hold (ms)</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="avg-flight-time">0</span>
+                        <span class="stat-label">Avg Flight (ms)</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="wpm">0</span>
+                        <span class="stat-label">WPM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="card results" id="results">
+                <div class="card-title">Analysis Results</div>
+                <div id="prediction-box" class="prediction-box">
+                    <div class="prediction-title" id="prediction-title">Analyzing...</div>
+                    <div class="prediction-subtitle" id="prediction-subtitle"></div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidence-fill" style="width: 0%">
+                            <span id="confidence-text">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-title">Feature Analysis</div>
+                <div class="feature-grid" id="feature-grid">
+                    <!-- Features will be populated here -->
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <canvas id="timingChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Indicator -->
+    <div class="status" id="status">
+        <span class="status-indicator status-ready"></span>
+        <span id="status-text">Ready</span>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+        // Keystroke data collection
+        class KeystrokeAnalyzer {
+            constructor() {
+                this.keystrokes = [];
+                this.pressTimestamps = new Map();
+                this.startTime = null;
+                this.chart = null;
+            }
+
+            reset() {
+                this.keystrokes = [];
+                this.pressTimestamps.clear();
+                this.startTime = null;
+            }
+
+            recordKeyPress(event) {
+                if (event.repeat) return; // ignore auto-repeat
+                const now = performance.now();
+                if (!this.startTime) this.startTime = now;
+
+                const code = event.code || event.key;
+                this.pressTimestamps.set(code, now);
+            }
+
+            recordKeyRelease(event) {
+                const now = performance.now();
+                const code = event.code || event.key;
+                const pressTime = this.pressTimestamps.get(code);
+                if (pressTime !== undefined) {
+                    const holdTime = now - pressTime;
+                    const lastKeystroke = this.keystrokes[this.keystrokes.length - 1];
+                    const flightTime = lastKeystroke ? (pressTime - lastKeystroke.releaseTime) : null;
+
+                    this.keystrokes.push({
+                        key: event.key,
+                        code: (event.code || event.key),
+                        pressTime: pressTime,
+                        releaseTime: now,
+                        holdTime: holdTime,
+                        flightTime: flightTime,
+                        timestamp: now - this.startTime
+                    });
+
+                    this.pressTimestamps.delete(code);
+                    this.updateStats();
+                }
+            }
+
+            updateStats() {
+                const count = this.keystrokes.length;
+                document.getElementById('keystroke-count').textContent = count;
+
+                if (count > 0) {
+                    const holdTimes = this.keystrokes.map(k => k.holdTime);
+                    const avgHold = (holdTimes.reduce((a, b) => a + b, 0) / count).toFixed(1);
+                    document.getElementById('avg-hold-time').textContent = avgHold;
+
+                    const flightTimes = this.keystrokes
+                        .map(k => k.flightTime)
+                        .filter(f => f !== null);
+                    
+                    if (flightTimes.length > 0) {
+                        const avgFlight = (flightTimes.reduce((a, b) => a + b, 0) / flightTimes.length).toFixed(1);
+                        document.getElementById('avg-flight-time').textContent = avgFlight;
+                    }
+
+                    // Calculate WPM
+                    const duration = (this.keystrokes[count - 1].timestamp) / 1000 / 60;
+                    const words = count / 5; // Standard: 5 keystrokes = 1 word
+                    const wpm = Math.round(words / duration);
+                    document.getElementById('wpm').textContent = wpm;
+                }
+            }
+
+            extractFeatures() {
+                if (this.keystrokes.length < 10) {
+                    return null;
+                }
+
+                const holdTimes = this.keystrokes.map(k => k.holdTime);
+                const flightTimesAll = this.keystrokes
+                    .map(k => k.flightTime)
+                    .filter(f => f !== null);
+                const flightTimes = flightTimesAll; // keep name used below
+
+                // Press-press (keydown-to-next-keydown) as a latency-like proxy
+                const pressTimes = this.keystrokes.map(k => k.pressTime).slice().sort((a,b)=>a-b);
+                const pressPress = [];
+                for (let i = 1; i < pressTimes.length; i++) {
+                    const d = pressTimes[i] - pressTimes[i-1];
+                    if (d > 1 && d < 5000) pressPress.push(d);
+                }
+
+                // Negative flight rate (overlap typing)
+                const flightNegRate = flightTimesAll.length
+                    ? flightTimesAll.filter(x => x < 0).length / flightTimesAll.length
+                    : 0;
+
+                // Burst-based active typing speed (keys/min)
+                const GAP_MS = 5000;
+                const MIN_BURST_KEYS = 30;
+
+                const gaps = [];
+                for (let i = 1; i < pressTimes.length; i++) gaps.push(pressTimes[i] - pressTimes[i-1]);
+                const longGapRate = gaps.length ? gaps.filter(g => g > GAP_MS).length / gaps.length : 0;
+
+                // Split into bursts
+                let bursts = [];
+                let startIdx = 0;
+                for (let i = 1; i < pressTimes.length; i++) {
+                    if (pressTimes[i] - pressTimes[i-1] > GAP_MS) {
+                        bursts.push([startIdx, i-1]);
+                        startIdx = i;
+                    }
+                }
+                bursts.push([startIdx, pressTimes.length - 1]);
+
+                const burstSpeeds = [];
+                let activeMsTotal = 0;
+                bursts.forEach(([a,b]) => {
+                    const n = b - a + 1;
+                    if (n < MIN_BURST_KEYS) return;
+                    const durMs = Math.max(1, pressTimes[b] - pressTimes[a]);
+                    activeMsTotal += durMs;
+                    burstSpeeds.push(n / (durMs / 60000));
+                });
+
+                const activeKpmMean = burstSpeeds.length ? this.mean(burstSpeeds) : 0;
+                const activeKpmStd = burstSpeeds.length ? this.std(burstSpeeds) : 0;
+                const burstCount = burstSpeeds.length;
+                const activeMinutes = activeMsTotal / 60000;
+const features = {
+                    // Hold time features
+                    holdMean: this.mean(holdTimes),
+                    holdStd: this.std(holdTimes),
+                    holdMedian: this.median(holdTimes),
+                    holdCV: this.cv(holdTimes),
+                    
+                    // Flight time features
+                    flightMean: this.mean(flightTimes),
+                    flightStd: this.std(flightTimes),
+                    flightMedian: this.median(flightTimes),
+                    flightCV: this.cv(flightTimes),
+                    
+                    // Latency-like features (press-press)
+                    pressPressMean: pressPress.length ? this.mean(pressPress) : 0,
+                    pressPressStd: pressPress.length ? this.std(pressPress) : 0,
+                    
+                    // Burst/active speed features
+                    activeKpmMean: activeKpmMean,
+                    activeKpmStd: activeKpmStd,
+                    burstCount: burstCount,
+                    activeMinutes: activeMinutes,
+                    longGapRate: longGapRate,
+
+                    // Flight overlap rate
+                    flightNegRate: flightNegRate,
+                    
+                    // Variability features (key for PD detection)
+                    holdIrregularity: this.std(this.diff(holdTimes)),
+                    flightIrregularity: this.std(this.diff(flightTimes)),
+                    
+                    // Typing metrics
+                    totalKeystrokes: this.keystrokes.length,
+                    typingSpeed: this.keystrokes.length / ((this.keystrokes[this.keystrokes.length - 1].timestamp) / 1000),
+                    
+                    // Raw data for visualization
+                    holdTimeSeries: holdTimes,
+                    flightTimeSeries: flightTimes
+                };
+
+                return features;
+            }
+
+            toModelPayload(features) {
+                // Map UI feature names -> model feature names (snake_case)
+                return {
+                    active_kpm_mean: features.activeKpmMean ?? 0,
+                    active_kpm_std: features.activeKpmStd ?? 0,
+                    burst_count: features.burstCount ?? 0,
+                    active_minutes: features.activeMinutes ?? 0,
+                    long_gap_rate: features.longGapRate ?? 0,
+
+                    hold_mean: features.holdMean ?? 0,
+                    hold_std: features.holdStd ?? 0,
+
+                    lat_mean: features.pressPressMean ?? 0,
+                    lat_std: features.pressPressStd ?? 0,
+
+                    flt_mean: features.flightMean ?? 0,
+                    flt_std: features.flightStd ?? 0,
+                    flt_neg_rate: features.flightNegRate ?? 0,
+
+                    n_keys: features.totalKeystrokes ?? 0
+                };
+            }
+
+
+            // Statistical helpers
+            mean(arr) {
+                return arr.reduce((a, b) => a + b, 0) / arr.length;
+            }
+
+            median(arr) {
+                const sorted = [...arr].sort((a, b) => a - b);
+                const mid = Math.floor(sorted.length / 2);
+                return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+            }
+
+            std(arr) {
+                const mean = this.mean(arr);
+                const variance = arr.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / arr.length;
+                return Math.sqrt(variance);
+            }
+
+            cv(arr) {
+                const mean = this.mean(arr);
+                return mean > 0 ? (this.std(arr) / mean) : 0;
+            }
+
+            diff(arr) {
+                return arr.slice(1).map((val, i) => val - arr[i]);
+            }
+
+            // Simple ML classifier (simulated)
+            classify(features) {
+                // Simulate ML classification based on known PD indicators:
+                // - Increased hold time variability (bradykinesia)
+                // - Higher irregularity in timing (tremor)
+                // - Slower overall typing (rigidity)
+                
+                let riskScore = 0;
+                let factors = [];
+
+                // Hold time variability (PD patients show higher CV)
+                if (features.holdCV > 0.35) {
+                    riskScore += 25;
+                    factors.push('Elevated hold time variability');
+                }
+
+                // Flight time variability
+                if (features.flightCV > 0.6) {
+                    riskScore += 20;
+                    factors.push('Irregular keystroke intervals');
+                }
+
+                // Irregularity measures
+                if (features.holdIrregularity > 30) {
+                    riskScore += 25;
+                    factors.push('High timing irregularity');
+                }
+
+                // Slow typing speed
+                if (features.typingSpeed < 3) {
+                    riskScore += 15;
+                    factors.push('Reduced typing speed');
+                }
+
+                // Mean hold time (PD patients may have prolonged holds)
+                if (features.holdMean > 150) {
+                    riskScore += 15;
+                    factors.push('Prolonged key press duration');
+                }
+
+                // Add some random variation to simulate ML uncertainty
+                riskScore += (Math.random() - 0.5) * 10;
+                riskScore = Math.max(0, Math.min(100, riskScore));
+
+                return {
+                    riskScore: riskScore,
+                    prediction: riskScore > 50 ? 'POTENTIAL RISK' : 'NORMAL PATTERN',
+                    confidence: Math.abs(riskScore - 50) * 2,
+                    factors: factors,
+                    features: features
+                };
+            }
+
+            visualize(features) {
+                const ctx = document.getElementById('timingChart');
+                
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+
+                const labels = features.holdTimeSeries.map((_, i) => i + 1);
+
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Hold Time (ms)',
+                                data: features.holdTimeSeries,
+                                borderColor: '#1a4d2e',
+                                backgroundColor: 'rgba(26, 77, 46, 0.1)',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
+                            },
+                            {
+                                label: 'Flight Time (ms)',
+                                data: features.flightTimeSeries,
+                                borderColor: '#90be6d',
+                                backgroundColor: 'rgba(144, 190, 109, 0.1)',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        family: "'IBM Plex Mono', monospace",
+                                        size: 12
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Keystroke Timing Pattern',
+                                font: {
+                                    family: "'IBM Plex Mono', monospace",
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Time (ms)',
+                                    font: {
+                                        family: "'IBM Plex Mono', monospace"
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Keystroke Number',
+                                    font: {
+                                        family: "'IBM Plex Mono', monospace"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            displayResults(result) {
+                const resultsDiv = document.getElementById('results');
+                const predictionBox = document.getElementById('prediction-box');
+                const predictionTitle = document.getElementById('prediction-title');
+                const predictionSubtitle = document.getElementById('prediction-subtitle');
+                const confidenceFill = document.getElementById('confidence-fill');
+                const confidenceText = document.getElementById('confidence-text');
+
+                // Show results
+                resultsDiv.classList.add('show');
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                // Set prediction
+                if (result.prediction === 'NORMAL PATTERN') {
+                    predictionBox.className = 'prediction-box prediction-healthy';
+                    predictionTitle.textContent = '✓ Normal Typing Pattern';
+                    predictionSubtitle.textContent = 'No significant motor irregularities detected' + (result.probPd !== undefined ? ` (Prob(PD)=${(result.probPd).toFixed(3)}, thr=${(result.threshold ?? 0).toFixed(2)})` : '');
+                } else {
+                    predictionBox.className = 'prediction-box prediction-risk';
+                    predictionTitle.textContent = '⚠ Atypical Pattern Detected';
+                    predictionSubtitle.textContent = 'Consider professional evaluation if concerned' + (result.probPd !== undefined ? ` (Prob(PD)=${(result.probPd).toFixed(3)}, thr=${(result.threshold ?? 0).toFixed(2)})` : '');
+                }
+
+                // Animate confidence bar
+                setTimeout(() => {
+                    confidenceFill.style.width = result.confidence + '%';
+                    confidenceText.textContent = result.confidence.toFixed(0) + '%';
+                }, 100);
+
+                // Display features
+                const featureGrid = document.getElementById('feature-grid');
+                featureGrid.innerHTML = '';
+
+                const featureList = [
+                    { name: 'Risk Score', value: result.riskScore.toFixed(0) + '/100', threshold: 50 },
+                    { name: 'Hold Time Avg', value: result.features.holdMean.toFixed(1) + ' ms', threshold: 150 },
+                    { name: 'Hold Time CV', value: result.features.holdCV.toFixed(2), threshold: 0.35 },
+                    { name: 'Flight Time Avg', value: result.features.flightMean.toFixed(1) + ' ms', threshold: 300 },
+                    { name: 'Flight Time CV', value: result.features.flightCV.toFixed(2), threshold: 0.6 },
+                    { name: 'Typing Speed', value: result.features.typingSpeed.toFixed(1) + ' key/s', threshold: 3, inverse: true }
+                ];
+
+                featureList.forEach(feature => {
+                    const div = document.createElement('div');
+                    div.className = 'feature-item';
+                    
+                    let statusClass = 'feature-normal';
+                    const numValue = parseFloat(feature.value);
+                    
+                    if (feature.threshold) {
+                        if (feature.inverse) {
+                            if (numValue < feature.threshold) statusClass = 'feature-warning';
+                        } else {
+                            if (numValue > feature.threshold) statusClass = 'feature-warning';
+                            if (numValue > feature.threshold * 1.5) statusClass = 'feature-danger';
+                        }
+                    }
+
+                    div.innerHTML = `
+                        <div class="feature-name">${feature.name}</div>
+                        <div class="feature-value ${statusClass}">${feature.value}</div>
+                    `;
+                    featureGrid.appendChild(div);
+                });
+
+                // Show detected factors
+                if (result.factors.length > 0) {
+                    const factorsDiv = document.createElement('div');
+                    factorsDiv.style.marginTop = '1.5rem';
+                    factorsDiv.innerHTML = `
+                        <div class="card-title" style="font-size: 1rem; margin-bottom: 0.5rem;">Detected Indicators:</div>
+                        <ul style="list-style: none; padding: 0;">
+                            ${result.factors.map(f => `<li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border);">• ${f}</li>`).join('')}
+                        </ul>
+                    `;
+                    featureGrid.parentElement.insertBefore(factorsDiv, featureGrid.nextSibling);
+                }
+
+                // Create visualization
+                this.visualize(result.features);
+            }
+        }
+
+        // Initialize
+        const analyzer = new KeystrokeAnalyzer();
+        const typingArea = document.getElementById('typing-area');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const status = document.getElementById('status');
+        const statusText = document.getElementById('status-text');
+
+        // Event listeners
+        typingArea.addEventListener('keydown', (e) => {
+            analyzer.recordKeyPress(e);
+            status.classList.add('show');
+            statusText.textContent = 'Recording...';
+            status.querySelector('.status-indicator').className = 'status-indicator status-recording';
+        });
+
+        typingArea.addEventListener('keyup', (e) => {
+            analyzer.recordKeyRelease(e);
+        });
+
+        analyzeBtn.addEventListener('click', async () => {
+            const features = analyzer.extractFeatures();
+
+            if (!features || (features.totalKeystrokes || 0) < 80) {
+                alert('Please type a bit more (aim for 80+ keystrokes) before analyzing.');
+                return;
+            }
+
+            analyzeBtn.disabled = true;
+            statusText.textContent = 'Analyzing...';
+            status.querySelector('.status-indicator').className = 'status-indicator status-recording';
+
+            try {
+                const payload = analyzer.toModelPayload(features);
+
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.error || 'Unknown error');
+
+                const prob = data.prob_pd;      // 0..1
+                const thr = data.threshold;     // recommended threshold (e.g. 0.75)
+                const pred = (prob >= thr) ? 'POTENTIAL RISK' : 'NORMAL PATTERN';
+
+                // Confidence proxy: distance from decision boundary
+                const confidence = Math.min(100, Math.abs(prob - thr) * 200);
+
+                const result = {
+                    riskScore: prob * 100,
+                    prediction: pred,
+                    confidence: confidence,
+                    factors: [],
+                    features: features,
+                    probPd: prob,
+                    threshold: thr
+                };
+
+                analyzer.displayResults(result);
+                analyzer.visualize(features);
+
+                statusText.textContent = 'Analysis Complete';
+                status.querySelector('.status-indicator').className = 'status-indicator status-ready';
+            } catch (e) {
+                alert('Prediction failed: ' + e.message);
+                statusText.textContent = 'Ready';
+                status.querySelector('.status-indicator').className = 'status-indicator status-ready';
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            analyzer.reset();
+            typingArea.value = '';
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('keystroke-count').textContent = '0';
+            document.getElementById('avg-hold-time').textContent = '0';
+            document.getElementById('avg-flight-time').textContent = '0';
+            document.getElementById('wpm').textContent = '0';
+            statusText.textContent = 'Ready';
+            status.querySelector('.status-indicator').className = 'status-indicator status-ready';
+        });
+
+        // Show status on load
+        setTimeout(() => {
+            status.classList.add('show');
+        }, 500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+1) Install:
+   pip install -r requirements.txt
+
+2) Train model (from your existing tappy_features.csv):
+   python train_web_model.py --csv PATH_TO_YOUR_tappy_features.csv --out tappy_web_model.joblib
+
+3) Compute best threshold (optional but recommended):
+   python find_best_threshold.py --csv PATH_TO_YOUR_tappy_features.csv --model tappy_web_model.joblib --out threshold.json
+
+4) Run server:
+   python app.py
+
+5) Open:
+   http://127.0.0.1:5000
+
+Type 80+ keystrokes then click Analyze.
