@@ -1,0 +1,11 @@
+{
+  "optimal_features": [
+    "hold_mean",
+    "hold_std",
+    "flt_mean",
+    "flt_std",
+    "long_gap_rate",
+    "flt_neg_rate"
+  ],
+  "final_rf_auc": 0.6254
+}

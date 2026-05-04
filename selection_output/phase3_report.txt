@@ -1,0 +1,46 @@
+PHASE 3 – FORWARD FEATURE SELECTION LOG
+==================================================
+Start: ['hold_mean', 'hold_std', 'flt_mean', 'flt_std']  AUC=0.5472
+
+Round 1 — candidates tried:
+  add long_gap_rate          AUC=0.6195  Δ=+0.0723 ← BEST
+  add active_kpm_mean        AUC=0.5719  Δ=+0.0246
+  add active_kpm_std         AUC=0.5666  Δ=+0.0193
+  add burst_count            AUC=0.5636  Δ=+0.0164
+  add active_minutes         AUC=0.5550  Δ=+0.0078
+  add flt_neg_rate           AUC=0.5537  Δ=+0.0064
+  add n_keys                 AUC=0.5496  Δ=+0.0023
+  add lat_mean               AUC=0.5257  Δ=-0.0215
+  add lat_std                AUC=0.5249  Δ=-0.0223
+  ADDED long_gap_rate  → AUC=0.6195  (Δ=+0.0723)
+
+Round 2 — candidates tried:
+  add flt_neg_rate           AUC=0.6254  Δ=+0.0058 ← BEST
+  add burst_count            AUC=0.6125  Δ=-0.0070
+  add active_minutes         AUC=0.6124  Δ=-0.0071
+  add lat_mean               AUC=0.6115  Δ=-0.0080
+  add lat_std                AUC=0.6095  Δ=-0.0100
+  add n_keys                 AUC=0.6077  Δ=-0.0118
+  add active_kpm_mean        AUC=0.6063  Δ=-0.0132
+  add active_kpm_std         AUC=0.6037  Δ=-0.0158
+  ADDED flt_neg_rate  → AUC=0.6254  (Δ=+0.0058)
+
+Round 3 — candidates tried:
+  add active_kpm_std         AUC=0.6145  Δ=-0.0109 ← BEST
+  add active_kpm_mean        AUC=0.6144  Δ=-0.0109
+  add n_keys                 AUC=0.6128  Δ=-0.0126
+  add lat_std                AUC=0.6127  Δ=-0.0127
+  add active_minutes         AUC=0.6111  Δ=-0.0142
+  add burst_count            AUC=0.6106  Δ=-0.0148
+  add lat_mean               AUC=0.6086  Δ=-0.0168
+  No candidate improved AUC by >0.002. Best was active_kpm_std (Δ=-0.0109). Stopping.
+
+==================================================
+OPTIMAL FEATURE SUBSET (6 features):
+  hold_mean
+  hold_std
+  flt_mean
+  flt_std
+  long_gap_rate
+  flt_neg_rate
+Final CV AUC (RF): 0.6254

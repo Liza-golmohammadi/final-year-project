@@ -1,5 +1,5 @@
 {
-  "threshold": 0.75,
+  "threshold": 0.5,
   "cv_auc": 0.587560365791006,
   "best_balanced_accuracy": 0.5914991266225982
 }

@@ -1,0 +1,55 @@
+======================================================================
+PHASE 1 – DATA QUALITY AUDIT REPORT
+======================================================================
+
+Dataset summary
+  Control sessions : 97
+  PD sessions      : 301
+  Total sessions   : 398
+  Class ratio PD   : 75.6%
+
+----------------------------------------------------------------------
+FEATURE SIGNAL SUMMARY  (Mann-Whitney U, α=0.05)
+----------------------------------------------------------------------
+  Significant features (4/13) : hold_std, active_kpm_mean, hold_mean, long_gap_rate
+  Non-significant        : active_kpm_std, flt_mean, burst_count, flt_std, active_minutes, lat_std, lat_mean, n_keys, flt_neg_rate
+
+----------------------------------------------------------------------
+PER-FEATURE DETAILS  (sorted by p-value)
+----------------------------------------------------------------------
+Feature              ctrl_med   pd_med        d   effect    p-value    sig stars
+--------------------------------------------------------------------------------
+hold_std                37.42    43.12     0.39    small     0.0028    YES    **
+active_kpm_mean        130.07   113.72    -0.34    small     0.0028    YES    **
+hold_mean              107.73   113.94     0.34    small     0.0081    YES    **
+long_gap_rate            0.04     0.05    -0.13 negligible     0.0410    YES     *
+active_kpm_std          36.34    32.79    -0.09 negligible     0.2411     no    ns
+flt_mean               188.87   193.22     0.12 negligible     0.2866     no    ns
+burst_count             62.00    72.00    -0.03 negligible     0.3998     no    ns
+flt_std                122.28   115.18     0.05 negligible     0.4834     no    ns
+active_minutes          50.66    53.87     0.00 negligible     0.5760     no    ns
+lat_std                121.34   108.61     0.01 negligible     0.6143     no    ns
+lat_mean               275.71   278.54     0.08 negligible     0.6570     no    ns
+n_keys                9429.00  9040.00    -0.05 negligible     0.9899     no    ns
+flt_neg_rate             0.00     0.00     0.00 negligible     1.0000     no    ns
+
+----------------------------------------------------------------------
+RECOMMENDATIONS FOR PHASE 2/3
+----------------------------------------------------------------------
+  Secondary features (small effect, include in forward selection):
+    hold_std               d=+0.39  p=0.0028  **
+    active_kpm_mean        d=-0.34  p=0.0028  **
+    hold_mean              d=+0.34  p=0.0081  **
+  Weak features (negligible effect, likely to add noise):
+    long_gap_rate          d=-0.13  p=0.0410  *
+    active_kpm_std         d=-0.09  p=0.2411  ns
+    flt_mean               d=+0.12  p=0.2866  ns
+    burst_count            d=-0.03  p=0.3998  ns
+    flt_std                d=+0.05  p=0.4834  ns
+    active_minutes         d=+0.00  p=0.5760  ns
+    lat_std                d=+0.01  p=0.6143  ns
+    lat_mean               d=+0.08  p=0.6570  ns
+    n_keys                 d=-0.05  p=0.9899  ns
+    flt_neg_rate           d=+0.00  p=1.0000  ns
+
+======================================================================

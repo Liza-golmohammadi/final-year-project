@@ -1,0 +1,23 @@
+# Large data files
+*.npy
+unified_transitions.csv
+window_features.csv
+windows_index.csv
+
+# Raw datasets
+tappy-keystroke-data-1.0.0/
+neuroqwerty-mit-csxpd-dataset-1.0.0/
+neuroQWERTY/
+
+# Generated output folders
+out_tappy/
+out_neuroqwerty/
+combined/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Threshold (local config)
+threshold.json

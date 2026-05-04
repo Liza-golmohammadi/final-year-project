@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroType — Speech Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Crimson+Pro:wght@300;400;600&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4d2e;
+            --secondary: #4f772d;
+            --accent: #90be6d;
+            --highlight: #f9c74f;
+            --danger: #f94144;
+            --bg-light: #f8f9f5;
+            --text-dark: #1a1a1a;
+            --text-light: #f8f9f5;
+            --border: rgba(26, 77, 46, 0.2);
+            --shadow: rgba(0, 0, 0, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e8f0e8 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+
+        /* ── NAV ── */
+        .nav {
+            background: var(--primary);
+            padding: 0.7rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+        }
+
+        .nav-brand {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+        }
+
+        .nav-steps { display: flex; gap: 0.5rem; }
+
+        .nav-step {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: rgba(255,255,255,0.65);
+            border: 1px solid rgba(255,255,255,0.18);
+            white-space: nowrap;
+        }
+
+        .nav-step:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        .nav-step.active {
+            background: var(--accent);
+            color: var(--primary);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .nav-sep {
+            color: rgba(255,255,255,0.3);
+            font-size: 1rem;
+        }
+
+        /* ── DEV BANNER ── */
+        .dev-banner {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-bottom: 3px solid #f59e0b;
+            padding: 0.9rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dev-banner-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .dev-badge {
+            background: #d97706;
+            color: white;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.3rem 0.65rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .dev-banner-text {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.88rem;
+            color: #92400e;
+            line-height: 1.6;
+        }
+
+        .dev-banner-text strong { color: #78350f; }
+
+        /* ── LAYOUT ── */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem 0 0.5rem;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            color: white;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .page-header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 2.4rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.4rem;
+            animation: fadeInDown 0.7s ease-out;
+        }
+
+        .page-header .subtitle {
+            font-size: 1.15rem;
+            color: var(--secondary);
+            font-weight: 300;
+            animation: fadeInUp 0.7s ease-out 0.15s both;
+        }
+
+        @keyframes fadeInDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeInUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
+
+        /* ── PROGRESS ── */
+        .progress-section { margin-bottom: 2rem; }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--secondary);
+        }
+
+        .progress-track {
+            height: 7px;
+            background: rgba(26,77,46,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            transition: width 0.6s ease-out;
+            width: 0%;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.4rem;
+        }
+
+        .prog-label {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.76rem;
+            color: var(--secondary);
+            opacity: 0.55;
+            transition: opacity 0.3s, color 0.3s;
+        }
+
+        .prog-label.done { opacity: 1; color: var(--primary); font-weight: 700; }
+
+        /* ── MAIN GRID ── */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s, box-shadow 0.3s, opacity 0.3s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 0.3s ease;
+        }
+
+        .card:not(.locked):hover::before { transform: scaleY(1); transform-origin: top; }
+
+        .card.locked { opacity: 0.55; pointer-events: none; }
+
+        .card.completed { border-color: #22c55e; }
+        .card.completed::before { background: linear-gradient(180deg, #16a34a, #4ade80); transform: scaleY(1); }
+
+        .card-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .card-subtitle {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.8rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0;
+            text-transform: none;
+            white-space: nowrap;
+        }
+
+        .badge-idle     { background: #f1f5f9; color: #64748b; }
+        .badge-recording{ background: #fee2e2; color: #dc2626; }
+        .badge-done     { background: #dcfce7; color: #15803d; }
+        .badge-locked   { background: #f1f5f9; color: #94a3b8; }
+
+        .instructions {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.93rem;
+            color: #4a5568;
+            margin-bottom: 1.25rem;
+            line-height: 1.75;
+            padding: 0.7rem 1rem;
+            background: rgba(26,77,46,0.035);
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+        }
+
+        /* ── WAVEFORM ── */
+        .waveform-wrap {
+            background: rgba(26,77,46,0.04);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 1rem 0;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            overflow: hidden;
+        }
+
+        .wv-bar {
+            flex: 1;
+            background: var(--accent);
+            border-radius: 3px;
+            height: 50px;
+            transform: scaleY(0.06);
+            transform-origin: center;
+            transition: transform 80ms ease, opacity 300ms;
+            opacity: 0.4;
+        }
+
+        /* ── CONTROLS ── */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn {
+            font-family: 'IBM Plex Mono', monospace;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-record {
+            background: #dc2626;
+            color: white;
+            box-shadow: 0 3px 10px rgba(220,38,38,0.28);
+        }
+
+        .btn-record:hover:not(:disabled) {
+            background: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(220,38,38,0.38);
+        }
+
+        .btn-stop {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            background: #475569;
+            transform: translateY(-1px);
+        }
+
+        .btn-example {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--border);
+            padding: 0.5rem 0.9rem;
+            font-size: 0.76rem;
+        }
+
+        .btn-example:hover { border-color: var(--primary); background: rgba(26,77,46,0.04); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 14px rgba(26,77,46,0.28);
+            padding: 0.85rem 2rem;
+            font-size: 0.88rem;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26,77,46,0.38);
+        }
+
+        .btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+        .timer-pill {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--secondary);
+            padding: 0.38rem 0.75rem;
+            background: rgba(26,77,46,0.06);
+            border-radius: 6px;
+        }
+
+        .countdown-big {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--danger);
+            min-width: 2.5rem;
+            text-align: center;
+        }
+
+        .task-status-line {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.6rem;
+        }
+
+        .measure-note {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.8rem;
+            color: var(--secondary);
+            padding: 0.45rem 0.7rem;
+            background: rgba(144,190,109,0.1);
+            border-radius: 6px;
+            margin-top: 0.9rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        /* ── TASK 2 SPECIFIC ── */
+        .syllable-display {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            padding: 0.7rem 1rem;
+            background: linear-gradient(135deg, rgba(26,77,46,0.05), rgba(79,119,45,0.05));
+            border-radius: 8px;
+            letter-spacing: 0.04em;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .feedback-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.7rem;
+            margin-top: 0.75rem;
+        }
+
+        .fb-item {
+            padding: 0.55rem 0.85rem;
+            background: rgba(26,77,46,0.04);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .fb-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 0.15rem;
+        }
+
+        .fb-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* ── TASK 3 SPECIFIC ── */
+        .reading-box {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.25rem;
+            color: var(--text-light);
+            padding: 1rem 1.4rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            margin-bottom: 1.2rem;
+            line-height: 1.7;
+            box-shadow: 0 4px 14px rgba(26,77,46,0.28);
+        }
+
+        /* ── EXTRACTION PANEL ── */
+        .extraction-panel {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .extraction-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 1.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .extraction-header:hover { background: linear-gradient(135deg, #0f3d21, #3d5e21); }
+
+        .ext-toggle { transition: transform 0.3s; font-size: 0.9rem; }
+        .ext-toggle.open { transform: rotate(180deg); }
+
+        .extraction-body { padding: 1.4rem; }
+
+        .ext-result {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            padding: 1rem 1.1rem;
+            background: rgba(26, 77, 46, 0.04);
+            color: #1a4d2e;
+            border: 1px solid rgba(26, 77, 46, 0.15);
+            border-radius: 8px;
+            margin-bottom: 0.9rem;
+            line-height: 2;
+            display: none;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .ext-result.show { display: block; }
+
+        .ext-result .arr { color: #4f772d; }
+        .ext-result .val { color: #1a4d2e; font-weight: 600; }
+
+        .ext-result.combined {
+            background: rgba(26, 77, 46, 0.06);
+            border: 1px solid rgba(26, 77, 46, 0.2);
+        }
+
+        .ext-result.combined .val.high { color: #f94144; font-size: 0.95rem; }
+
+        .no-tasks-msg {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.88rem;
+            color: #94a3b8;
+            text-align: center;
+            padding: 1.5rem 0;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0);    }
+        }
+
+        /* ── FUSION ── */
+        .fusion-section {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+            margin-bottom: 1.5rem;
+        }
+
+        .fusion-section.show { display: block; }
+
+        .fusion-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            padding: 2rem;
+            color: white;
+            text-align: center;
+            box-shadow: 0 6px 24px rgba(26,77,46,0.35);
+        }
+
+        .fusion-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .fusion-formula {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.88rem;
+            opacity: 0.85;
+            margin-bottom: 1.25rem;
+            padding: 0.7rem 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.4rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            position: sticky;
+            top: 74px;
+        }
+
+        .sidebar-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            margin-bottom: 1.1rem;
+            padding-bottom: 0.65rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .sb-section { margin-bottom: 1.1rem; }
+
+        .sb-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .sb-section ul { list-style: none; padding: 0; }
+
+        .sb-section li {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.81rem;
+            color: #444;
+            padding: 0.28rem 0 0.28rem 1rem;
+            position: relative;
+            border-bottom: 1px solid rgba(26,77,46,0.05);
+        }
+
+        .sb-section li:last-child { border-bottom: none; }
+
+        .sb-section li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 0.72rem;
+        }
+
+        .evidence-item {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.8rem;
+            padding: 0.45rem 0.7rem;
+            background: rgba(26,77,46,0.04);
+            border-radius: 6px;
+            margin-bottom: 0.45rem;
+            border-left: 3px solid var(--accent);
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .evidence-item strong { color: var(--primary); }
+
+        /* ── FOOTER ── */
+        .footer-card {
+            background: linear-gradient(135deg, #0d1b0e, #1a2e1a);
+            border-radius: 12px;
+            padding: 2rem;
+            color: white;
+            margin-top: 2rem;
+        }
+
+        .footer-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 1.1rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.86rem;
+            line-height: 1.5;
+            color: rgba(255,255,255,0.78);
+        }
+
+        .footer-item .icon { font-size: 1rem; margin-top: 0.1rem; }
+
+        .footer-note {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.4);
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1024px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .sidebar-card { position: static; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+    <div class="nav-brand">NeuroType</div>
+    <div class="nav-steps">
+        <a href="/" class="nav-step">
+            <span>①</span> Keystroke Analysis
+        </a>
+        <span class="nav-sep">›</span>
+        <a href="/speech" class="nav-step active">
+            <span>②</span> Speech Verification
+        </a>
+    </div>
+</nav>
+
+<!-- DEV BANNER -->
+<div class="dev-banner">
+    <div class="dev-banner-inner">
+        <span class="dev-badge">In Development</span>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div class="step-badge">STEP 2 OF 2 — MANDATORY FOR ALL RISK LEVELS</div>
+        <h1>Speech Verification</h1>
+        <div class="subtitle">Active Vocal Biomarker Analysis for Parkinson's Risk Assessment</div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-section">
+        <div class="progress-header">
+            <span id="prog-label">Task 0 / 3 Complete</span>
+            <span id="prog-pct">0%</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="prog-fill"></div>
+        </div>
+        <div class="progress-labels">
+            <span class="prog-label" id="pl-1">1. Sustained Vowel</span>
+            <span class="prog-label" id="pl-2">2. Syllable Repetition</span>
+            <span class="prog-label" id="pl-3">3. Reading Passage</span>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <!-- ══ LEFT: TASKS ══ -->
+        <div>
+
+            <!-- TASK 1 -->
+            <div class="card" id="card-1">
+                <div class="card-title">
+                    Task 1: Sustained Vowel Phonation
+                    <span class="badge badge-idle" id="badge-1">⚪ Not Started</span>
+                </div>
+                <div class="card-subtitle">Phonation stability assessment</div>
+                <div class="instructions">
+                    Press Record, take a deep breath, then say <strong>"ahhh"</strong> in one continuous tone for 5–10 seconds without stopping.
+                </div>
+
+                <div class="waveform-wrap" id="wv-1">
+                    <div class="wv-bar"></div><div class="wv-bar"></div><div class="wv-bar"></div>
+                    <div class="wv-bar"></div><div class="wv-bar"></div><div class="wv-bar"></div>
+                    <div class="wv-bar"></div><div class="wv-bar"></div><div class="wv-bar"></div>
+                    <div class="wv-bar"></div><div class="wv-bar"></div><div class="wv-bar"></div>
+                    <div class="wv-bar"></div><div class="wv-bar"></div><div class="wv-bar"></div>
+                    <div class="wv-bar"></div><div class="wv-bar"></div><div class="wv-bar"></div>
+                    <div class="wv-bar"></div><div class="wv-bar"></div><div class="wv-bar"></div>
+                    <div class="wv-bar"></div><div class="wv-bar"></div><div class="wv-bar"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-example" onclick="playExample(this)">▶ Listen to Example</button>
+                    <button class="btn btn-record" id="rec-1" onclick="toggleRec(1)">🔴 Start Recording</button>
+                    <button class="btn btn-stop" id="stop-1" disabled onclick="stopRec(1)">⏹ Stop</button>
+                    <span class="timer-pill" id="timer-1">Duration: 0.0s / Target: 5–10s</span>
+                </div>
+
+                <div class="task-status-line" id="status-1">⚪ Not Started</div>
+                <div class="measure-note">What we measure: Jitter, shimmer, HNR, pitch stability</div>
+            </div>
+
+            <!-- TASK 2 -->
+            <div class="card locked" id="card-2">
+                <div class="card-title">
+                    Task 2: Rapid Syllable Repetition
+                    <span class="badge badge-locked" id="badge-2">🔒 Locked</span>
+                </div>
+                <div class="card-subtitle">Diadochokinetic test — articulatory speed</div>
+                <div class="instructions">
+                    Say <strong>"pa-ta-ka"</strong> as quickly and clearly as possible, repeating for 5 seconds.
+                </div>
+
+                <div class="syllable-display">PA-TA-KA · PA-TA-KA · PA-TA-KA · PA-TA-KA...</div>
+
+                <div class="controls">
+                    <button class="btn btn-example" onclick="playExample(this)">▶ Listen to Example</button>
+                    <button class="btn btn-record" id="rec-2" onclick="toggleRec(2)">🔴 Start Recording (5s)</button>
+                    <span class="countdown-big" id="cd-2" style="display:none;">5</span>
+                </div>
+
+                <div class="feedback-row">
+                    <div class="fb-item">
+                        <div class="fb-label">Syllables Detected</div>
+                        <div class="fb-value" id="fb-syllables">—</div>
+                    </div>
+                    <div class="fb-item">
+                        <div class="fb-label">Rate (syllables/sec)</div>
+                        <div class="fb-value" id="fb-rate">—</div>
+                    </div>
+                </div>
+
+                <div class="task-status-line" id="status-2">🔒 Complete Task 1 first</div>
+                <div class="measure-note">What we measure: Articulatory speed, rhythm consistency</div>
+            </div>
+
+            <!-- TASK 3 -->
+            <div class="card locked" id="card-3">
+                <div class="card-title">
+                    Task 3: Reading Passage
+                    <span class="badge badge-locked" id="badge-3">🔒 Locked</span>
+                </div>
+                <div class="card-subtitle">Prosody and speech rate analysis</div>
+                <div class="instructions">
+                    Read the sentence below at your natural speaking pace.
+                </div>
+
+                <div class="reading-box">
+                    "The quick brown fox jumps over the lazy dog."
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-record" id="rec-3" onclick="toggleRec(3)">🔴 Start Recording</button>
+                    <button class="btn btn-stop" id="stop-3" disabled onclick="stopRec(3)">⏹ Stop</button>
+                    <span class="timer-pill" id="timer-3">Duration: 0.0s</span>
+                </div>
+
+                <div class="feedback-row">
+                    <div class="fb-item">
+                        <div class="fb-label">Duration</div>
+                        <div class="fb-value" id="fb-duration">0.0s</div>
+                    </div>
+                    <div class="fb-item">
+                        <div class="fb-label">Speaking Rate</div>
+                        <div class="fb-value" id="fb-wpm">— wpm</div>
+                    </div>
+                </div>
+
+                <div class="task-status-line" id="status-3">🔒 Complete Task 2 first</div>
+                <div class="measure-note">What we measure: Prosody, pause patterns, articulation clarity</div>
+            </div>
+
+            <!-- EXTRACTION PANEL -->
+            <div class="extraction-panel">
+                <div class="extraction-header" onclick="togglePanel()">
+                    <span>Feature Extraction &amp; Analysis</span>
+                    <span class="ext-toggle open" id="ext-toggle">▼</span>
+                </div>
+                <div class="extraction-body" id="ext-body">
+
+                    <div class="no-tasks-msg" id="no-tasks">
+                        Complete tasks above to see feature extraction results here.
+                    </div>
+
+                    <div class="ext-result" id="ext-1">
+                        <span><strong>Sustained vowel processed</strong></span><br>
+                        <span><span class="arr">→</span> Extracted <span class="val">22</span> acoustic features</span><br>
+                        <span><span class="arr">→</span> Jitter: <span class="val">0.0035</span> &nbsp; Shimmer: <span class="val">0.024</span> &nbsp; HNR: <span class="val">17.2 dB</span></span><br>
+                        <span><span class="arr">→</span> Pitch (F0): <span class="val">118.4 Hz</span> &nbsp; RPDE: <span class="val">0.521</span> &nbsp; DFA: <span class="val">0.693</span></span>
+                    </div>
+
+                    <div class="ext-result" id="ext-2">
+                        <span><strong>Syllable repetition processed</strong></span><br>
+                        <span><span class="arr">→</span> Extracted <span class="val">8</span> temporal features</span><br>
+                        <span><span class="arr">→</span> Syllable rate: <span class="val">4.1/sec</span> &nbsp; Rhythm regularity: <span class="val">0.82</span></span><br>
+                        <span><span class="arr">→</span> Articulatory precision index: <span class="val">0.74</span></span>
+                    </div>
+
+                    <div class="ext-result" id="ext-3">
+                        <span><strong>Reading passage processed</strong></span><br>
+                        <span><span class="arr">→</span> Extracted <span class="val">15</span> prosodic features</span><br>
+                        <span><span class="arr">→</span> Speaking rate: <span class="val">118 wpm</span> &nbsp; Pause duration: <span class="val">0.28s avg</span></span><br>
+                        <span><span class="arr">→</span> Pitch variability: <span class="val">38.1 Hz</span> &nbsp; Voiced ratio: <span class="val">0.81</span></span>
+                    </div>
+
+                    <div class="ext-result combined" id="ext-combined">
+                        <span><strong>COMBINING FEATURES...</strong></span><br>
+                        <span><span class="arr">→</span> Total feature vector: <span class="val">45 dimensions</span> (22 + 8 + 15)</span><br>
+                        <br>
+                        <span><strong>RUNNING SPEECH MODEL...</strong></span><br>
+                        <span><span class="arr">→</span> Model: <span class="val">Random Forest</span> (UCI Parkinson's Dataset)</span><br>
+                        <span><span class="arr">→</span> Expected performance: <span class="val">AUC 0.85–0.90</span></span><br>
+                        <br>
+                        <span style="color:#f9c74f; font-weight:700; font-size:0.85rem;">RESULT:</span><br>
+                        <span><span class="arr">→</span> Speech Risk Score: <span class="val high">0.73 &nbsp;(High Risk)</span></span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- FUSION SECTION -->
+            <div class="fusion-section" id="fusion">
+                <div class="fusion-card">
+                    <div class="fusion-title">Weighted Fusion — Final Risk Score</div>
+                    <div class="fusion-formula">
+                        Final Score = W<sub>speech</sub> · P<sub>speech</sub> + W<sub>keystroke</sub> · P<sub>keystroke</sub>
+                    </div>
+                    <p style="font-family:'Nunito',sans-serif; font-size:0.9rem; opacity:0.82; margin-bottom:1.5rem; line-height:1.6;">
+                        Speech and keystroke scores will be combined using literature-derived weights
+                        (W<sub>speech</sub> &gt; W<sub>keystroke</sub> where validated).
+                        Final score sent for clinician review.
+                    </p>
+                    <button class="btn btn-primary" style="margin:0 auto;">
+                        Proceed to Weighted Fusion →
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ══ SIDEBAR ══ -->
+        <div>
+            <div class="sidebar-card">
+                <div class="sidebar-title">Speech Biomarkers (Literature)</div>
+
+                <div class="sb-section">
+                    <div class="sb-section-title">Acoustic Features — Task 1</div>
+                    <ul>
+                        <li><strong>Jitter:</strong> Pitch variation cycle-to-cycle</li>
+                        <li><strong>Shimmer:</strong> Amplitude variation</li>
+                        <li><strong>HNR:</strong> Harmonic-to-noise ratio</li>
+                        <li><strong>RPDE:</strong> Recurrence period density entropy</li>
+                        <li><strong>DFA:</strong> Detrended fluctuation analysis</li>
+                    </ul>
+                </div>
+
+                <div class="sb-section">
+                    <div class="sb-section-title">Temporal Features — Task 2</div>
+                    <ul>
+                        <li>Syllable rate (syllables/second)</li>
+                        <li>Articulation precision index</li>
+                        <li>Rhythm regularity coefficient</li>
+                    </ul>
+                </div>
+
+                <div class="sb-section">
+                    <div class="sb-section-title">Prosodic Features — Task 3</div>
+                    <ul>
+                        <li>Speaking rate (words/minute)</li>
+                        <li>Pause duration and frequency</li>
+                        <li>Pitch variability (F0 range)</li>
+                    </ul>
+                </div>
+
+                <div class="sb-section">
+                    <div class="sb-section-title">Evidence Base</div>
+                    <div class="evidence-item">
+                        <strong>Tsanas et al. (2012):</strong><br>AUC &gt;0.99 with sustained vowel features
+                    </div>
+                    <div class="evidence-item">
+                        <strong>Sakar et al. (2019):</strong><br>AUC 0.85–0.90 across multiple tasks
+                    </div>
+                    <div class="evidence-item" style="color:#555;">
+                        Features validated in <strong>1,000+ patients</strong>
+                    </div>
+                </div>
+
+                <div class="sb-section">
+                    <div class="sb-section-title">Training Dataset</div>
+                    <ul>
+                        <li>UCI Parkinson's Telemonitoring Dataset</li>
+                        <li>5,875 voice recordings, 31 subjects</li>
+                        <li>Publicly available for research</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-card">
+        <div class="footer-title">Implementation Status</div>
+        <div class="footer-grid">
+            <div class="footer-item">
+                <span class="icon">✅</span>
+                <div><strong style="color:var(--accent);">Step 1 — Keystroke:</strong> Implemented and validated (AUC: 0.748)</div>
+            </div>
+            <div class="footer-item">
+                <span class="icon">🚧</span>
+                <div><strong style="color:#f9c74f;">Step 2 — Speech:</strong> Interface design complete, implementation planned 2026</div>
+            </div>
+            <div class="footer-item">
+                <span class="icon">📋</span>
+                <div><strong style="color:rgba(255,255,255,0.8);">Clinical Validation:</strong> Parkinson's UK partnership in discussion</div>
+            </div>
+        </div>
+        <div class="footer-note">
+            This mockup demonstrates the envisioned user experience for the multimodal screening system. Not a medical diagnostic tool.
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ─── STATE ───────────────────────────────────────────────
+    const taskState = { 1: 'idle', 2: 'locked', 3: 'locked' };
+    let completedCount = 0;
+    const intervals  = {};   // tick intervals
+    const wvFrames   = {};   // rAF handles for waveform
+
+    // ─── PANEL TOGGLE ────────────────────────────────────────
+    function togglePanel() {
+        const body    = document.getElementById('ext-body');
+        const toggle  = document.getElementById('ext-toggle');
+        const isOpen  = body.style.display !== 'none';
+        body.style.display   = isOpen ? 'none' : 'block';
+        toggle.classList.toggle('open', !isOpen);
+    }
+
+    // ─── EXAMPLE BUTTON ──────────────────────────────────────
+    function playExample(btn) {
+        const orig = btn.textContent;
+        btn.textContent = '⏸ Playing...';
+        btn.disabled = true;
+        setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1800);
+    }
+
+    // ─── WAVEFORM ANIMATION ──────────────────────────────────
+    function startWaveform(n) {
+        const bars = document.querySelectorAll(`#wv-${n} .wv-bar`);
+        let tick = 0;
+        const targets = Array.from(bars).map(() => Math.random());
+
+        function frame() {
+            tick++;
+            if (tick % 4 === 0) {          // ~15fps
+                bars.forEach((b, i) => {
+                    targets[i] += (Math.random() - 0.5) * 0.35;
+                    targets[i]  = Math.max(0.08, Math.min(0.98, targets[i]));
+                    b.style.transform = `scaleY(${targets[i].toFixed(3)})`;
+                    b.style.opacity   = '0.82';
+                });
+            }
+            wvFrames[n] = requestAnimationFrame(frame);
+        }
+        wvFrames[n] = requestAnimationFrame(frame);
+    }
+
+    function stopWaveform(n) {
+        if (wvFrames[n]) { cancelAnimationFrame(wvFrames[n]); delete wvFrames[n]; }
+        // Freeze at a "recorded" silhouette
+        const bars   = document.querySelectorAll(`#wv-${n} .wv-bar`);
+        const frozen = [0.55, 0.72, 0.40, 0.85, 0.60, 0.30, 0.78, 0.50, 0.92, 0.45,
+                        0.68, 0.35, 0.80, 0.55, 0.70, 0.42, 0.88, 0.60, 0.38, 0.65,
+                        0.50, 0.75, 0.45, 0.60];
+        bars.forEach((b, i) => {
+            b.style.transform = `scaleY(${frozen[i] ?? 0.5})`;
+            b.style.opacity   = '0.55';
+        });
+    }
+
+    // ─── TIMER ───────────────────────────────────────────────
+    function startTimer(n) {
+        let ms = 0;
+        intervals[n] = setInterval(() => {
+            ms += 100;
+            const s = (ms / 1000).toFixed(1) + 's';
+            const el1 = document.getElementById(`timer-${n}`);
+            const el2 = document.getElementById('fb-duration');
+            if (el1) el1.textContent = n === 1 ? `Duration: ${s} / Target: 5–10s` : `Duration: ${s}`;
+            if (n === 3 && el2) el2.textContent = s;
+        }, 100);
+    }
+
+    function stopTimer(n) {
+        if (intervals[n]) { clearInterval(intervals[n]); delete intervals[n]; }
+    }
+
+    // ─── RECORDING CONTROL ───────────────────────────────────
+    function toggleRec(n) {
+        if (taskState[n] === 'recording') stopRec(n);
+        else startRec(n);
+    }
+
+    function startRec(n) {
+        if (taskState[n] === 'locked') return;
+        taskState[n] = 'recording';
+
+        setBadge(n, 'badge-recording', '🔄 Recording...');
+        setStatus(n, '🔄 Recording...');
+
+        const recBtn  = document.getElementById(`rec-${n}`);
+        const stopBtn = document.getElementById(`stop-${n}`);
+        if (recBtn)  { recBtn.textContent = '⏹ Stop Recording'; recBtn.className = 'btn btn-stop'; }
+        if (stopBtn) stopBtn.disabled = false;
+
+        startTimer(n);
+        if (n !== 2) startWaveform(n);
+
+        // Task 2: 5-second countdown
+        if (n === 2) {
+            let count = 5;
+            const cdEl = document.getElementById('cd-2');
+            cdEl.style.display = 'inline-block';
+            cdEl.textContent   = count;
+            intervals['cd'] = setInterval(() => {
+                count--;
+                cdEl.textContent = count;
+                if (count <= 0) {
+                    clearInterval(intervals['cd']);
+                    cdEl.style.display = 'none';
+                    completeTask(n);
+                }
+            }, 1000);
+        } else {
+            // Auto-complete after ~4 s
+            setTimeout(() => {
+                if (taskState[n] === 'recording') completeTask(n);
+            }, 4000);
+        }
+    }
+
+    function stopRec(n) {
+        if (taskState[n] === 'recording') completeTask(n);
+    }
+
+    // ─── COMPLETE TASK ────────────────────────────────────────
+    function completeTask(n) {
+        if (taskState[n] === 'done') return;   // guard against double-fire
+        taskState[n] = 'done';
+        stopTimer(n);
+        stopWaveform(n);
+
+        // Update card
+        const card = document.getElementById(`card-${n}`);
+        card.classList.add('completed');
+
+        setBadge(n, 'badge-done', '✅ Complete');
+        setStatus(n, '✅ Recording Complete');
+
+        const recBtn  = document.getElementById(`rec-${n}`);
+        const stopBtn = document.getElementById(`stop-${n}`);
+        if (recBtn)  { recBtn.disabled = true; recBtn.textContent = '✅ Done'; }
+        if (stopBtn) stopBtn.disabled = true;
+
+        // Task-specific feedback
+        if (n === 2) {
+            document.getElementById('fb-syllables').textContent = '21';
+            document.getElementById('fb-rate').textContent      = '4.1';
+        }
+        if (n === 3) {
+            document.getElementById('fb-wpm').textContent = '118 wpm';
+        }
+
+        // Show extraction result
+        document.getElementById('no-tasks').style.display = 'none';
+        document.getElementById(`ext-${n}`).classList.add('show');
+
+        completedCount = Math.min(completedCount + 1, 3);
+        updateProgress();
+
+        // Unlock next task
+        if (n < 3) {
+            setTimeout(() => {
+                unlockTask(n + 1);
+                document.getElementById(`card-${n + 1}`)
+                    .scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 500);
+        }
+
+        // All done
+        if (completedCount >= 3) {
+            setTimeout(() => {
+                document.getElementById('ext-combined').classList.add('show');
+                const fusionEl = document.getElementById('fusion');
+                fusionEl.classList.add('show');
+                setTimeout(() => fusionEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+            }, 900);
+        }
+    }
+
+    // ─── UNLOCK ──────────────────────────────────────────────
+    function unlockTask(n) {
+        taskState[n] = 'idle';
+        const card = document.getElementById(`card-${n}`);
+        card.classList.remove('locked');
+        setBadge(n, 'badge-idle', '⚪ Not Started');
+        setStatus(n, '⚪ Not Started');
+    }
+
+    // ─── PROGRESS ────────────────────────────────────────────
+    function updateProgress() {
+        const pct = Math.min(Math.round((completedCount / 3) * 100), 100);
+        document.getElementById('prog-fill').style.width  = pct + '%';
+        document.getElementById('prog-label').textContent = `Task ${completedCount} / 3 Complete`;
+        document.getElementById('prog-pct').textContent   = pct + '%';
+        for (let i = 1; i <= completedCount; i++)
+            document.getElementById(`pl-${i}`).classList.add('done');
+    }
+
+    // ─── HELPERS ─────────────────────────────────────────────
+    function setBadge(n, cls, text) {
+        const el = document.getElementById(`badge-${n}`);
+        if (el) { el.className = `badge ${cls}`; el.textContent = text; }
+    }
+
+    function setStatus(n, text) {
+        const el = document.getElementById(`status-${n}`);
+        if (el) el.textContent = text;
+    }
+</script>
+</body>
+</html>

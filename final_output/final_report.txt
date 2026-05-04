@@ -1,0 +1,25 @@
+======================================================================
+PHASE 4 – FINAL MODEL PERFORMANCE REPORT
+======================================================================
+
+Features used (6):  hold_mean, hold_std, flt_mean, flt_std, long_gap_rate, flt_neg_rate
+Dataset:  97 control  /  301 PD  (total 398)
+CV:  StratifiedGroupKFold(5, shuffle=True, random_state=42)
+
+----------------------------------------------------------------------
+METRICS (5-fold subject-wise CV, threshold=0.5)
+----------------------------------------------------------------------
+Model            AUC BalancedAcc   Sensitivity   Specificity      F1
+----------------------------------------------------------------------
+SVM           0.5908      0.5050        0.9070        0.1031  0.8260
+RF            0.6295      0.5656        0.8837        0.2474  0.8313
+MLP           0.5673      0.5052        1.0000        0.0103  0.8625
+Ensemble      0.6219      0.5117        0.9203        0.1031  0.8331
+
+----------------------------------------------------------------------
+Best model: RF  (AUC=0.6295)
+
+Saved model: final_output/final_model.joblib
+(Compatible with app.py — drop-in replacement for tappy_web_model.joblib)
+
+======================================================================

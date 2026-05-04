@@ -1,0 +1,5 @@
+feature_set,n_features,model,AUC,BalancedAcc,Sensitivity,Specificity,F1
+4_core,4,SVM,0.506,0.475,0.857,0.093,0.798
+4_core,4,RF,0.547,0.494,0.864,0.124,0.805
+13_all,13,SVM,0.513,0.488,0.914,0.062,0.825
+13_all,13,RF,0.586,0.524,0.914,0.134,0.833
